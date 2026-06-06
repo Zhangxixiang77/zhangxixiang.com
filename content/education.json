@@ -1,0 +1,24 @@
+{
+  "title": "education",
+  "subtitle": "what i've been a student of",
+  "items": [
+    {
+      "year": "2020 — 2024",
+      "name": "East China Normal University",
+      "place": "Shanghai",
+      "note": "BEng, School of Data Science and Engineering"
+    },
+    {
+      "year": "2024 — 2026",
+      "name": "University of Warwick",
+      "place": "Coventry, UK",
+      "note": "MSc, Department of Computer Science"
+    },
+    {
+      "year": "2026 — now",
+      "name": "East China Normal University",
+      "place": "Shanghai",
+      "note": "PhD, Institute of AI for Education"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "title": "places lived",
+  "subtitle": "cities that took some of me with them",
+  "items": [
+    {
+      "city": "Qingdao",
+      "years": "2001 — 2020",
+      "note": "born here"
+    },
+    {
+      "city": "Shanghai",
+      "years": "2020 — 2024",
+      "note": ""
+    },
+    {
+      "city": "Coventry, UK",
+      "years": "2024 — 2025",
+      "note": ""
+    },
+    {
+      "city": "Shanghai",
+      "years": "2026 — now",
+      "note": "back where it makes sense"
+    }
+  ]
+}

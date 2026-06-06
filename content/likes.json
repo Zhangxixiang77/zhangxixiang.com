@@ -1,0 +1,16 @@
+{
+  "title": "likes",
+  "subtitle": "ten things, no particular order",
+  "items": [
+    { "kind": "food", "value": "Dumplings" },
+    { "kind": "drink", "value": "Zero Coke with Ice" },
+    { "kind": "fruit", "value": "Watermelon" },
+    { "kind": "game", "value": "NBA 2K" },
+    { "kind": "color", "value": "Light Blue", "hex": "#90d6ff" },
+    { "kind": "song", "value": "Liang Bo — 《我不知道》" },
+    { "kind": "shoes", "value": "Nike AF1 Flyknit — no-crease" },
+    { "kind": "word", "value": "Accept" },
+    { "kind": "characters", "value": "Yi'er and Bubu" },
+    { "kind": "line", "value": "他强任他强, i am zhang·xi·xiang." }
+  ]
+}

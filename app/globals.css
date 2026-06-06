@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Paper / page tones — space-separated RGB so Tailwind /opacity works */
+  --paper: 251 247 238;
+  --paper-soft: 244 238 223;
+
+  /* Ink / text tones */
+  --ink: 42 37 32;
+  --ink-soft: 107 98 88;
+  --ink-faint: 163 152 136;
+
+  /* Hairlines */
+  --hairline: 221 212 192;
+
+  /* Night sky (constant, used as hex directly in Sky.tsx) */
+  --sky-bg: #0E1A2C;
+  --star: #F8F1E1;
+
+  /* Accent for hover states */
+  --accent: 106 141 184;
+}
+
+html, body {
+  background: rgb(var(--paper));
+  color: rgb(var(--ink));
+}
+
+/* Small selection color tweak to keep the warmth */
+::selection {
+  background: rgb(var(--ink));
+  color: rgb(var(--paper));
+}
+
+/* Section header line */
+.hdr-line {
+  flex: 1;
+  height: 1px;
+  background: var(--hairline);
+}
+
+/* Star group hover halo */
+.star-group .star-halo {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.star-group:hover .star-halo {
+  opacity: 0.35;
+}
+.star-group { cursor: pointer; }
+
+/* Reduce motion respects */
+@media (prefers-reduced-motion: reduce) {
+  .star-core { animation: none !important; }
+}

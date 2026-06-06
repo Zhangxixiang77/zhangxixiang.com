@@ -1,0 +1,28 @@
+{
+  "title": "Q&A with myself",
+  "subtitle": "questions nobody asked",
+  "items": [
+    {
+      "q": "what's your zodiac sign?",
+      "a": "Scorpio"
+    },
+    {
+      "q": "your MBTI?",
+      "a": "ISFJ"
+    },
+    {
+      "q": "what are you building right now?",
+      "a": "Smart Learning Companion",
+      "linkLabel": "see it →",
+      "linkHref": "https://google.com"
+    },
+    {
+      "q": "what team have you always backed?",
+      "a": "The Dallas Mavericks! I'm MFFL."
+    },
+    {
+      "q": "what did you build this site with?",
+      "a": "Claude Opus 4.7"
+    }
+  ]
+}
