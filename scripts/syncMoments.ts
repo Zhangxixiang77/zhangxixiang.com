@@ -1,15 +1,21 @@
 /**
  * syncMoments.ts
  *
- * Build-time only script (run via `npm run sync` before `next build`).
- * Downloads all moment images from Notion, converts them to WebP,
- * and writes a static moments.json that the app reads at runtime.
+ * Build-time only script — run via `npm run sync` before `next build`.
  *
- * No Notion API calls happen during `next build` / `next start`.
+ * Pipeline per image:
+ *   Notion HEIC/HEIF/JPG/PNG/URL
+ * → download buffer
+ *     → HEIC/HEIF? heic-convert → JPEG buffer
+ *     → sharp → WebP
+ *     → verify with metadata()
+ *     → save to public/moments/{id}-{version}.webp
+ *
+ * No Python required —100% Node.js.
  */
 
 import 'dotenv/config';
-import { writeFileSync, mkdirSync, createWriteStream, unlinkSync, copyFileSync } from 'fs';
+import { writeFileSync, mkdirSync, unlinkSync, readdirSync, readFileSync } from 'fs';
 import { pipeline } from 'stream/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -27,54 +33,60 @@ const { Client } = require('@notionhq/client');
 const notion = new Client({ auth: process.env.NOTION_API_KEY });
 const DATABASE_ID = process.env.NOTION_DATABASE_ID ?? '';
 
-// ─── HTTP download helper ─────────────────────────────────────────────────────
+// ─── Helpers ───────────────────────────────────────────────────────────────────
 
-async function downloadFile(url: string, dest: string): Promise<void> {
-  mkdirSync(dirname(dest), { recursive: true });
-  const file = createWriteStream(dest);
+/** True if bytes 8-12 match a known HEIC/HEIF brand. */
+function isHeicBrand(buf: Buffer): boolean {
+  if (buf.length < 12) return false;
+  const brand = buf.toString('ascii', 8, 12);
+  return ['heic', 'heix', 'hevc', 'hevx', 'heim', 'heis', 'mif1', 'msf1', 'avif'].some(
+    (b) => brand === b
+  );
+}
+
+async function downloadBuffer(url: string): Promise<Buffer> {
+  const chunks: Buffer[] = [];
   const protocol = url.startsWith('https') ? https : http;
   await new Promise<void>((resolve, reject) => {
     protocol.get(url, (res) => {
-      if (res.statusCode === 301 || res.statusCode === 302) {
-        file.close();
-        return downloadFile(res.headers.location!, dest).then(resolve, reject);
+      if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+               return downloadBuffer(res.headers.location!).then(() => resolve()).catch(reject);
       }
       if (res.statusCode !== 200) {
-        file.close();
-        return reject(new Error(`HTTP ${res.statusCode} for ${url}`));
+        return reject(new Error(`HTTP ${res.statusCode}`));
       }
-      pipeline(res, file).then(() => resolve()).catch(reject);
+      res.on('data', (chunk: Buffer) => chunks.push(chunk));
+      res.on('end', () => resolve());
+      res.on('error', reject);
     }).on('error', reject);
   });
+  return Buffer.concat(chunks);
 }
 
-// ─── Image conversion ──────────────────────────────────────────────────────────
-
-async function toWebp(inputPath: string, outputPath: string): Promise<void> {
+async function toWebp(inputBuf: Buffer, outputPath: string): Promise<void> {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const sharp = require('sharp');
 
-  try {
-    await sharp(inputPath).webp({ quality: 82 }).toFile(outputPath);
-  } catch {
-    // sharp can't decode HEIC — use Python pillow-heif to convert via PIL
-    const { execSync } = require('child_process');
-    const pngPath = inputPath + '.png';
-    try {
-      const pythonScript = [
-        'from PIL import Image',
-        'import pillow_heif',
-        'pillow_heif.register_heif_opener()',
-        `img = Image.open(r'${inputPath}')`,
-        `img.save(r'${pngPath}')`,
-      ].join('; ');
-      execSync(`python -c "${pythonScript}"`, { stdio: 'pipe' });
-      await sharp(pngPath).webp({ quality: 82 }).toFile(outputPath);
-    } catch {
-      copyFileSync(inputPath, outputPath);
-    } finally {
-      try { unlinkSync(pngPath); } catch { /* ignore */ }
-    }
+  let buf = inputBuf;
+
+  if (isHeicBrand(inputBuf)) {
+    // HEIC/HEIF → heic-convert → JPEG buffer → sharp → WebP
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const heicConvert = require('heic-convert');
+    const jpegBuf = await heicConvert({
+      buffer: inputBuf,
+      format: 'JPEG',
+      quality: 90,
+    });
+    buf = Buffer.from(jpegBuf);
+  }
+
+  await sharp(buf).webp({ quality: 82 }).toFile(outputPath);
+
+  // Verify the output is a valid image
+  const meta = await sharp(outputPath).metadata();
+  if (!meta.width || !meta.height) {
+    throw new Error(`Invalid WebP generated: ${outputPath}`);
   }
 }
 
@@ -83,6 +95,21 @@ async function toWebp(inputPath: string, outputPath: string): Promise<void> {
 async function main() {
   console.log('NOTION_API_KEY:', process.env.NOTION_API_KEY ? '✔ set' : '✗ MISSING');
   console.log('NOTION_DATABASE_ID:', process.env.NOTION_DATABASE_ID ? '✔ set' : '✗ MISSING');
+
+  // Clear old images before syncing — removes stale/bad files
+  try {
+    const old = readdirSync(PUBLIC_DIR);
+    for (const f of old) {
+      unlinkSync(join(PUBLIC_DIR, f));
+    }
+    console.log(`Cleared ${old.length} old files from public/moments`);
+  } catch {
+    // directory empty or missing — fine
+  }
+
+  mkdirSync(PUBLIC_DIR, { recursive: true });
+  mkdirSync(dirname(DATA_FILE), { recursive: true });
+
   console.log('Fetching moments from Notion…');
   const response = await notion.databases.query({
     database_id: DATABASE_ID,
@@ -90,9 +117,6 @@ async function main() {
     sorts: [{ property: 'date', direction: 'descending' }],
     page_size: 100,
   });
-
-  mkdirSync(PUBLIC_DIR, { recursive: true });
-  mkdirSync(dirname(DATA_FILE), { recursive: true });
 
   const moments: {
     id: string;
@@ -138,22 +162,20 @@ async function main() {
     };
 
     if (imageUrl) {
-      const localFile = `${p.id}.webp`;
+      // Versioned filename — URL changes when Notion content updates
+      const version = (p.last_edited_time ?? Date.now())
+        .replaceAll('-', '')
+        .replaceAll(':', '')
+        .replaceAll('.', '');
+      const localFile = `${p.id}-${version}.webp`;
       const localPath = join(PUBLIC_DIR, localFile);
-      const tmpPath = join(PUBLIC_DIR, `${p.id}_tmp`);
 
       downloadPromises.push(
         (async () => {
           console.log(`  Download: ${captionRaw.slice(0, 40)}…`);
-          try {
-            await downloadFile(imageUrl, tmpPath);
-            await toWebp(tmpPath, localPath);
-            unlinkSync(tmpPath);
-            moment.image = `/moments/${localFile}`;
-          } catch (err) {
-            console.warn(`  Failed: "${captionRaw.slice(0, 30)}":`, err);
-            try { unlinkSync(tmpPath); } catch { /* ignore */ }
-          }
+          const buf = await downloadBuffer(imageUrl);
+          await toWebp(buf, localPath);
+          moment.image = `/moments/${localFile}`;
         })()
       );
     } else {
@@ -168,7 +190,7 @@ async function main() {
   await Promise.all(downloadPromises);
 
   writeFileSync(DATA_FILE, JSON.stringify(moments, null, 2));
-  console.log(`Done! ${moments.length} moments -> data/moments.json`);
+  console.log(`Done! ${moments.length} moments → data/moments.json`);
 }
 
 main().catch((err) => {

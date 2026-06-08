@@ -12,6 +12,7 @@
   "dependencies": {
     "@notionhq/client": "^2.2.15",
     "@tabler/icons-react": "^3.26.0",
+    "heic-convert": "^2.1.0",
     "next": "^15.5.18",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
