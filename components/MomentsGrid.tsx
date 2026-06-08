@@ -59,18 +59,28 @@ export default function MomentsGrid({ moments, totalCount }: Props) {
           <button
             key={m.id}
             onClick={() => setOpen(m)}
-            className="group relative aspect-square overflow-hidden rounded-md bg-cover bg-center transition-opacity hover:opacity-90"
-            style={m.image
-              ? { backgroundImage: `url(${m.image})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-              : { background: m.placeholderBg ?? 'rgb(var(--paper-soft))' }
-            }
+            className="group relative aspect-square overflow-hidden rounded-md transition-opacity hover:opacity-90"
             aria-label={m.caption}
           >
+            {m.image ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={m.image}
+                alt={m.caption}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            ) : (
+              <span
+                className="absolute inset-0 flex items-center justify-center"
+                style={{ background: m.placeholderBg ?? 'rgb(var(--paper-soft))' }}
+              >
+                <span className="text-ink/55">
+                  <PlaceholderIcon name={m.placeholderIcon} />
+                </span>
+              </span>
+            )}
             {/* Bottom gradient overlay — keeps date readable over any image */}
             <span className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/40 to-transparent" />
-            <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-ink/55">
-              <PlaceholderIcon name={m.placeholderIcon} />
-            </span>
             <span className="absolute bottom-2 left-2.5 text-[10px] tracking-[0.05em] text-white/80">
               {formatDateShort(m.date)}
             </span>

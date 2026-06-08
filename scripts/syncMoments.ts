@@ -8,8 +8,7 @@
  * No Notion API calls happen during `next build` / `next start`.
  */
 
-import { config } from 'dotenv';
-config({ path: '.env.local' });
+import 'dotenv/config';
 import { writeFileSync, mkdirSync, createWriteStream, unlinkSync, copyFileSync } from 'fs';
 import { pipeline } from 'stream/promises';
 import { join, dirname } from 'path';
@@ -62,7 +61,6 @@ async function toWebp(inputPath: string, outputPath: string): Promise<void> {
     const { execSync } = require('child_process');
     const pngPath = inputPath + '.png';
     try {
-      // Use a Python script file to avoid shell escaping issues on Windows
       const pythonScript = [
         'from PIL import Image',
         'import pillow_heif',
@@ -72,8 +70,7 @@ async function toWebp(inputPath: string, outputPath: string): Promise<void> {
       ].join('; ');
       execSync(`python -c "${pythonScript}"`, { stdio: 'pipe' });
       await sharp(pngPath).webp({ quality: 82 }).toFile(outputPath);
-    } catch (err) {
-      // Fallback: just copy the file
+    } catch {
       copyFileSync(inputPath, outputPath);
     } finally {
       try { unlinkSync(pngPath); } catch { /* ignore */ }

@@ -7,8 +7,8 @@ import SectionHeader from '@/components/SectionHeader';
 import { getRecentMoments, getMoments } from '@/lib/getMoments';
 import { voice } from '@/lib/voice';
 
-// Revalidate every 60s once Notion is wired up (Phase 2)
-export const revalidate = 60;
+// Static — regenerated at build time via `npm run sync`
+export const revalidate = false;
 
 export default async function Home() {
   const [recent, all] = await Promise.all([getRecentMoments(9), getMoments()]);

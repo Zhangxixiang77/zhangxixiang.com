@@ -4,7 +4,8 @@ import { getMoments } from '@/lib/getMoments';
 import { formatDateShort } from '@/lib/voice';
 import MomentsArchive from '@/components/MomentsArchive';
 
-export const revalidate = 60;
+// Static — regenerated at build time via `npm run sync`
+export const revalidate = false;
 
 export default async function MomentsPage() {
   const all = await getMoments();

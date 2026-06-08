@@ -37,3 +37,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# generated moments data (run `npm run sync` to regenerate)
+/data
+/public/moments
