@@ -10,6 +10,9 @@ export default function Hero() {
       <h1 className="animate-fadeup font-serif text-[36px] font-normal tracking-[0.04em] text-ink md:text-[56px]">
         Zhang Xixiang
       </h1>
+      <p className="mt-2 font-serif text-[13px] italic tracking-[0.03em] text-ink-faint">
+        a student, a vibe coder, a curious explorer of worlds
+      </p>
     </header>
   );
 }
