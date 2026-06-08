@@ -7,7 +7,7 @@
     { "kind": "fruit", "value": "Watermelon" },
     { "kind": "game", "value": "NBA 2K" },
     { "kind": "color", "value": "Light Blue", "hex": "#90d6ff" },
-    { "kind": "song", "value": "Liang Bo — 《我不知道》" },
+     { "kind": "song", "value": "刀郎 — 《西海情歌》" },
     { "kind": "shoes", "value": "Nike AF1 Flyknit — no-crease" },
     { "kind": "word", "value": "Accept" },
     { "kind": "characters", "value": "Yi'er and Bubu" },
