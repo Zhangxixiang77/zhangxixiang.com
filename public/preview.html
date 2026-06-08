@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI Learning Companion · Product Introduction Deck</title>
+<style>
+:root{
+  --ink:#0F2E2E;--ink-deep:#081C1C;--paper:#F5F2EC;--paper-warm:#EAE5DA;--text:#202323;--muted:#6B6B6B;--line:#D8D2C7;--amber:#E07B47;--gold:#C9A961;--white:#fff;
+  --serif: Georgia,"Source Han Serif SC","Noto Serif CJK SC","Songti SC",serif;
+  --sans: Inter,"PingFang SC","Source Han Sans SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --mono:"SF Mono","JetBrains Mono",Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;background:var(--ink-deep)}
+body{font-family:var(--sans);color:var(--text);background:var(--ink-deep);overflow-x:hidden}
+.deck-toolbar{position:fixed;z-index:50;top:18px;left:50%;transform:translateX(-50%);width:min(1180px,calc(100vw - 40px));display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border:1px solid rgba(255,255,255,.15);background:rgba(8,28,28,.72);backdrop-filter:blur(20px);border-radius:999px;color:#fff;box-shadow:0 16px 40px rgba(0,0,0,.18)}
+.brand{display:flex;align-items:center;gap:10px;font-size:14px;letter-spacing:.4px;white-space:nowrap}.brand-mark{color:var(--gold)}
+.toolbar-mid{font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.55);letter-spacing:1.6px;text-transform:uppercase}
+.controls{display:flex;align-items:center;gap:10px}.lang-toggle{display:flex;align-items:center;gap:4px;padding:4px;border:1px solid rgba(255,255,255,.18);border-radius:999px;background:rgba(255,255,255,.08)}
+.lang-toggle button{border:0;border-radius:999px;background:transparent;color:rgba(255,255,255,.6);padding:6px 10px;font-size:12px;cursor:pointer;transition:.2s}.lang-toggle button.active{background:var(--gold);color:var(--ink-deep);font-weight:700}.slide-count{font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.65);min-width:52px;text-align:right}
+.deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:auto;overflow-x:hidden}.slide{min-height:100vh;scroll-snap-align:start;position:relative;display:flex;align-items:center;justify-content:center;padding:96px 64px 64px}.slide::before{content:"";position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle at 16% 25%,rgba(201,169,97,.1),transparent 28%),radial-gradient(circle at 82% 74%,rgba(224,123,71,.08),transparent 32%)}
+.canvas{position:relative;width:min(1180px,100%);aspect-ratio:16/9;max-height:calc(100vh - 150px);padding:56px 64px;background:var(--paper);box-shadow:0 35px 120px rgba(0,0,0,.34);overflow:hidden;border:1px solid rgba(255,255,255,.18)}
+.canvas.dark{background:var(--ink);color:#fff}.canvas.deep{background:var(--ink-deep);color:#fff}.canvas.warm{background:var(--paper-warm)}.canvas::after{content:attr(data-page);position:absolute;right:32px;bottom:24px;font-family:var(--mono);font-size:12px;color:rgba(15,46,46,.38);letter-spacing:1px}.canvas.dark::after,.canvas.deep::after{color:rgba(255,255,255,.35)}
+.eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:3px;color:var(--amber);text-transform:uppercase;margin-bottom:20px}.dark .eyebrow,.deep .eyebrow{color:var(--gold)}
+h1,h2,h3{font-family:var(--serif);font-weight:600;letter-spacing:-.02em}h1{font-size:clamp(44px,5.1vw,72px);line-height:1.02;max-width:780px}h2{font-size:clamp(32px,3.4vw,48px);line-height:1.12;margin-bottom:20px}.lead{font-size:clamp(17px,1.55vw,22px);line-height:1.55;color:var(--muted);max-width:720px}.dark .lead,.deep .lead{color:rgba(255,255,255,.76)}.accent{color:var(--gold);font-style:italic;font-weight:400}.orange{color:var(--amber)}
+.cover-meta{position:absolute;left:64px;bottom:54px;display:grid;grid-template-columns:repeat(4,1fr);gap:26px;width:calc(100% - 128px);border-top:1px solid rgba(255,255,255,.16);padding-top:24px}.cover-meta div{font-size:13px;color:rgba(255,255,255,.55);line-height:1.5}.cover-meta strong{display:block;color:#fff;font-size:15px;margin-bottom:5px}.cover-org{position:absolute;right:64px;top:54px;text-align:right;font-size:12px;line-height:1.8;color:rgba(255,255,255,.5);letter-spacing:.8px}.cover-org strong{color:var(--gold);font-weight:500;display:block}
+.big-statement{font-family:var(--serif);font-size:clamp(32px,3.8vw,54px);line-height:1.18;color:var(--ink);max-width:900px}.dark .big-statement,.deep .big-statement{color:#fff}.split{display:grid;grid-template-columns:1fr 1fr;gap:54px;align-items:center}.compare-layout{gap:24px;align-items:stretch;margin-top:20px}.compare-panel{background:rgba(255,255,255,.78);border:1px solid var(--line);padding:26px 26px 22px;min-height:440px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}.compare-label{font-family:var(--mono);font-size:12px;letter-spacing:2px;color:var(--amber);text-transform:uppercase;margin-bottom:14px}.compare-panel .big-statement{font-size:34px;line-height:1.14;max-width:none}.compare-panel .lead{font-size:16px;line-height:1.55;margin-top:16px;max-width:none}.compare-panel .orb-wrap{height:160px;margin-top:18px}.compare-panel .orb{width:128px;height:128px;font-size:24px;box-shadow:0 0 56px rgba(224,123,71,.24)}.compare-panel .network{height:210px;margin-top:14px;display:flex;align-items:center;justify-content:center}.compare-panel .network svg{width:88%;height:100%}.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:34px}.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:34px}.card{background:#fff;border:1px solid var(--line);padding:30px 26px;min-height:210px;position:relative}.warm .card{background:rgba(255,255,255,.72)}.dark .card,.deep .card{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}.card-num{font-family:var(--serif);font-size:46px;color:var(--ink);line-height:1;margin-bottom:16px}.dark .card-num,.deep .card-num{color:var(--gold)}.card h3{font-size:22px;color:var(--ink);margin-bottom:10px}.dark .card h3,.deep .card h3{color:#fff}.card p{font-size:15px;line-height:1.65;color:#555}.dark .card p,.deep .card p{color:rgba(255,255,255,.72)}
+.orb-wrap{height:300px;display:flex;align-items:center;justify-content:center}.orb{width:190px;height:190px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#F7D9AD,var(--amber) 58%,#A84919);box-shadow:0 0 90px rgba(224,123,71,.34);display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--serif);font-size:30px}.network{height:320px;position:relative}.network svg{width:100%;height:100%}.quote{margin-top:28px;padding:28px 34px;border-left:4px solid var(--amber);background:#fff;font-family:var(--serif);font-style:italic;font-size:26px;line-height:1.42;color:var(--ink)}
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:42px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.flow-step{padding:34px 24px;border-left:1px solid var(--line);min-height:270px}.flow-step:first-child{border-left:0}.flow-num{font-family:var(--mono);font-size:12px;letter-spacing:2px;color:var(--amber);margin-bottom:14px}.flow-title{font-family:var(--serif);font-size:34px;color:var(--ink);margin-bottom:8px}.flow-sub{font-family:var(--serif);font-size:15px;font-style:italic;color:var(--amber);margin-bottom:16px}.flow-step p{font-size:14px;line-height:1.72;color:var(--muted)}
+.arch{display:grid;grid-template-columns:.88fr 1.12fr;gap:42px;align-items:center}.arch-list{list-style:none;margin-top:26px}.arch-list li{display:flex;gap:16px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:15px;line-height:1.5;color:rgba(255,255,255,.75)}.arch-list span{font-family:var(--mono);font-size:11px;color:var(--gold);letter-spacing:1.5px;width:108px;flex:0 0 108px}.arch-visual{aspect-ratio:1/1;width:94%;justify-self:end}.arch-visual svg{width:100%;height:100%}
+.cap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:34px}.cap{padding:25px;background:#fff;border-top:3px solid var(--amber);min-height:166px}.cap h3{font-size:21px;margin-bottom:11px;color:var(--ink)}.cap p{font-size:14px;line-height:1.62;color:var(--muted)}.story{min-height:310px}.story .quote-mini{font-family:var(--serif);font-style:italic;color:var(--ink);border-left:2px solid var(--gold);padding-left:16px;margin:16px 0 18px;font-size:17px;line-height:1.5}.story p{font-size:14px}.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:34px;margin-top:56px}.metric{border-left:1px solid rgba(255,255,255,.14);padding-left:28px}.metric:first-child{border-left:0}.metric-num{font-family:var(--serif);font-size:72px;line-height:1;color:var(--gold);margin-bottom:12px}.metric p{font-size:15px;line-height:1.55;color:rgba(255,255,255,.72)}.cta-actions{display:flex;gap:18px;margin-top:42px}.btn{padding:16px 28px;border:1px solid var(--ink);background:var(--ink);color:#fff;text-decoration:none;font-size:15px;letter-spacing:.8px;display:inline-flex;align-items:center;gap:10px}.btn.secondary{background:transparent;color:var(--ink)}.deep .btn{background:var(--gold);border-color:var(--gold);color:var(--ink-deep);font-weight:700}.deep .btn.secondary{background:transparent;color:#fff;border-color:rgba(255,255,255,.35)}
+.dots{position:fixed;right:26px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:30}.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.32);border:0;cursor:pointer}.dot.active{background:var(--gold);height:26px;border-radius:999px}.hide{display:none!important}
+@media (max-width:1440px), (max-height:860px){.deck-toolbar{top:12px;width:min(1160px,calc(100vw - 28px))}.slide{padding:78px 28px 34px}.canvas{padding:44px 48px;max-height:calc(100vh - 106px)}.eyebrow{font-size:12px;letter-spacing:2.4px;margin-bottom:16px}.cover-org{right:48px;top:40px;font-size:11px;line-height:1.65}.cover-meta{left:48px;bottom:36px;width:calc(100% - 96px);gap:18px;padding-top:18px}.cover-meta strong{font-size:14px}.cover-meta div{font-size:12px}.grid-3,.cap-grid{gap:16px}.grid-4{gap:14px}.card,.cap{padding:22px 20px}.card{min-height:186px}.story{min-height:270px}.flow{margin-top:28px}.flow-step{padding:24px 18px;min-height:220px}.flow-title{font-size:28px}.metric-grid{gap:22px;margin-top:36px}.metric-num{font-size:58px}.cta-actions{margin-top:28px}.btn{padding:14px 22px;font-size:14px}}
+@media (max-width:1280px), (max-height:760px){#slide-1 .canvas{display:flex;flex-direction:column;justify-content:flex-start}#slide-1 .cover-org{position:static;text-align:left;margin-bottom:14px}#slide-1 h1{max-width:960px}#slide-1 .lead{max-width:none;margin-top:18px !important}#slide-1 .cover-meta{position:static;left:auto;right:auto;bottom:auto;width:auto;margin-top:22px;grid-template-columns:repeat(2,1fr);gap:16px;padding-top:16px}#slide-1 .canvas::after{right:24px;bottom:18px}.canvas{padding:36px 40px}#slide-3 .compare-layout{gap:18px}.compare-panel{min-height:380px;padding:22px 22px 18px}.compare-panel .big-statement{font-size:30px}.compare-panel .lead{font-size:15px}.compare-panel .network{height:180px}.compare-panel .network svg{width:84%}.cover-meta div{font-size:11px}}
+@media (max-width:1120px){.toolbar-mid{display:none}.split,.arch,.compare-layout{grid-template-columns:1fr}.grid-3,.cap-grid,.metric-grid{grid-template-columns:repeat(2,1fr)}.flow{grid-template-columns:repeat(2,1fr)}.flow-step:nth-child(3){border-left:0;border-top:1px solid var(--line)}.flow-step:nth-child(4){border-top:1px solid var(--line)}}
+@media(max-width:900px){.deck-toolbar{top:10px;width:calc(100vw - 20px);border-radius:22px}.toolbar-mid{display:none}.slide{padding:80px 16px 36px}.canvas{aspect-ratio:auto;min-height:calc(100vh - 116px);max-height:none;padding:38px 28px}.split,.arch,.compare-layout{grid-template-columns:1fr}.compare-panel{min-height:auto}.compare-panel .big-statement{font-size:28px}.compare-panel .network{height:180px}.grid-3,.grid-4,.flow,.cap-grid,.metric-grid,.cover-meta{grid-template-columns:1fr}.flow-step,.metric{border-left:0;border-top:1px solid var(--line)}h1{font-size:46px}h2{font-size:36px}.lead{font-size:18px}.cover-meta{position:static;width:auto;margin-top:44px}.cover-org{position:static;text-align:left;margin-bottom:32px}.cta-actions{flex-direction:column;align-items:flex-start}.dots{display:none}}
+@media print{.deck-toolbar,.dots{display:none}.deck{height:auto;overflow:visible}.slide{height:100vh;break-after:page}.canvas{box-shadow:none;max-height:none;width:100%;height:auto}}
+</style>
+</head>
+<body>
+<header class="deck-toolbar">
+  <div class="brand"><span class="brand-mark">◆</span><span data-i18n="brand">AI Learning Companion</span></div>
+  <div class="toolbar-mid" data-i18n="deckLabel">Product Introduction Deck</div>
+  <div class="controls">
+    <div class="lang-toggle" aria-label="Language toggle">
+      <button id="enBtn" class="active" type="button">EN</button>
+      <button id="zhBtn" type="button">中文</button>
+    </div>
+    <div class="slide-count" id="slideCount">01 / 10</div>
+  </div>
+</header>
+<nav class="dots" id="dots" aria-label="Slide navigation"></nav>
+<main class="deck" id="deck">
+  <section class="slide" id="slide-1"><div class="canvas dark" data-page="01 / 10">
+    <div class="cover-org"><strong data-i18n="org1">ECNU Intelligent Education Lab</strong><span data-i18n="org2">Shanghai Institute of Intelligent Education<br>Key Lab in Intelligent Education, Ministry of Education</span></div>
+    <div class="eyebrow" data-i18n="s1eyebrow">01 · Product Vision</div>
+    <h1><span data-i18n="s1title">AI Learning Companion<br>for K-12 Teaching & Learning</span><br><span class="accent" data-i18n="s1accent">AI-powered teaching, learning and management tools</span></h1>
+    <p class="lead" style="margin-top:28px" data-i18n="s1lead">One companion as the student-facing entry. An agent cluster in the background. An education-native LLM as the reasoning base. Claw Constitution as the collaboration governance layer.</p>
+    <div class="cover-meta">
+      <div><strong>InnoSpark</strong><span data-i18n="m1">Education LLM under local control</span></div>
+      <div><strong>Claw Constitution</strong><span data-i18n="m2">Multi-agent collaboration charter</span></div>
+      <div><strong>Long-Horizon Memory</strong><span data-i18n="m3">Across semesters and school years</span></div>
+      <div><strong>Edu-Native</strong><span data-i18n="m4">Full-stack data governance</span></div>
+    </div>
+  </div></section>
+
+  <section class="slide" id="slide-2"><div class="canvas" data-page="02 / 10">
+    <div class="eyebrow" data-i18n="s2eyebrow">02 · Problem We Solve</div>
+    <h2 data-i18n="s2title">Three structural tensions in basic education</h2>
+    <p class="lead" data-i18n="s2lead">This is not another AI homework tool. It is designed to address long-standing core contradictions that technology has rarely solved well.</p>
+    <div class="grid-3">
+      <div class="card"><div class="card-num">01</div><h3 data-i18n="s2c1t">Uniform pace vs. personalized learning</h3><p data-i18n="s2c1p">In a class of 40 students, teachers often teach to the average. Fast learners wait; struggling learners fall behind.</p></div>
+      <div class="card"><div class="card-num">02</div><h3 data-i18n="s2c2t">Teacher overload vs. student overwork</h3><p data-i18n="s2c2p">Preparation, grading and reporting squeeze out time for instructional design and human care.</p></div>
+      <div class="card"><div class="card-num">03</div><h3 data-i18n="s2c3t">Scattered data vs. intuition-led decisions</h3><p data-i18n="s2c3p">Academic, wellbeing and behavior data remain fragmented. Problems are often noticed only after exams.</p></div>
+    </div>
+  </div></section>
+
+  <section class="slide" id="slide-3"><div class="canvas warm" data-page="03 / 10">
+    <div class="eyebrow" data-i18n="s3eyebrow">03 · Core Definition</div>
+    <h2 data-i18n="s3title">A companion, not just an agent</h2>
+    <div class="split compare-layout">
+      <div class="compare-panel">
+        <div>
+          <div class="compare-label" data-i18n="s3leftLabel">Student-facing</div>
+          <h3 class="big-statement" data-i18n="s3leftTitle">What students see:<br>one companion.</h3>
+          <p class="lead" data-i18n="s3leftP">Students no longer switch among a dozen AI tools. Homework, reflection, exercise and planning all start from one trusted entry.</p>
+        </div>
+        <div class="orb-wrap"><div class="orb" data-i18n="orb">Companion</div></div>
+      </div>
+      <div class="compare-panel">
+        <div>
+          <div class="compare-label" data-i18n="s3rightLabel">System backend</div>
+          <h3 class="big-statement" data-i18n="s3rightTitle">What the system runs:<br>a professional agent cluster.</h3>
+          <p class="lead" data-i18n="s3rightP">Academic tutoring, emotional support, health coaching, career guidance and diagnostics are handled by specialist agents connected through intelligent routing and Claw Constitution.</p>
+        </div>
+        <div class="network">
+          <svg viewBox="0 0 430 300" xmlns="http://www.w3.org/2000/svg">
+            <g stroke="#C9A961" stroke-width="1.1" stroke-dasharray="4 6" opacity=".55"><line x1="215" y1="150" x2="80" y2="70"/><line x1="215" y1="150" x2="80" y2="230"/><line x1="215" y1="150" x2="350" y2="70"/><line x1="215" y1="150" x2="350" y2="230"/><line x1="215" y1="150" x2="215" y2="45"/><line x1="215" y1="150" x2="215" y2="255"/></g>
+            <circle cx="215" cy="150" r="32" fill="#E07B47"/><text x="215" y="156" text-anchor="middle" fill="#fff" font-size="13" font-family="serif" data-svg-en="Router" data-svg-zh="路由">Router</text>
+            <g fill="#0F2E2E" stroke="#C9A961" stroke-width="2"><circle cx="80" cy="70" r="24"/><circle cx="80" cy="230" r="24"/><circle cx="350" cy="70" r="24"/><circle cx="350" cy="230" r="24"/><circle cx="215" cy="45" r="24"/><circle cx="215" cy="255" r="24"/></g>
+            <g fill="#C9A961" font-size="12" font-family="sans-serif" text-anchor="middle"><text x="80" y="74" data-svg-en="Study" data-svg-zh="学业">Study</text><text x="80" y="234" data-svg-en="Care" data-svg-zh="情感">Care</text><text x="350" y="74" data-svg-en="Health" data-svg-zh="健康">Health</text><text x="350" y="234" data-svg-en="Career" data-svg-zh="生涯">Career</text><text x="215" y="49" data-svg-en="Diagnosis" data-svg-zh="诊断">Diagnosis</text><text x="215" y="259" data-svg-en="Assessment" data-svg-zh="评价">Assessment</text></g>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div></section>
+
+  <section class="slide" id="slide-4"><div class="canvas" data-page="04 / 10">
+    <div class="eyebrow" data-i18n="s4eyebrow">04 · Methodology</div>
+    <h2 data-i18n="s4title">Profile · Route · Companion · Analytics</h2>
+    <p class="lead" data-i18n="s4lead">A closed data loop connects teaching, learning, management and evaluation into one continuous operating flow.</p>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-num">01 · PROFILE</div><div class="flow-title" data-i18n="s4f1t">Profile</div><div class="flow-sub" data-i18n="s4f1s">Multidimensional portrait</div><p data-i18n="s4f1p">Academic, psychological, health, behavior, interest and career data form a student digital twin.</p></div>
+      <div class="flow-step"><div class="flow-num">02 · ROUTE</div><div class="flow-title" data-i18n="s4f2t">Route</div><div class="flow-sub" data-i18n="s4f2s">Intelligent routing</div><p data-i18n="s4f2p">The companion detects intent and dynamically routes tasks to the right specialist agent.</p></div>
+      <div class="flow-step"><div class="flow-num">03 · COMPANION</div><div class="flow-title" data-i18n="s4f3t">Companion</div><div class="flow-sub" data-i18n="s4f3s">Multi-scenario support</div><p data-i18n="s4f3p">One partner, multiple roles: tutor, friend, coach, advisor and creative collaborator.</p></div>
+      <div class="flow-step"><div class="flow-num">04 · ANALYTICS</div><div class="flow-title" data-i18n="s4f4t">Analytics</div><div class="flow-sub" data-i18n="s4f4s">Data feedback</div><p data-i18n="s4f4p">Student, class and school insights feed back into lesson planning, decision-making and regional supervision.</p></div>
+    </div>
+  </div></section>
+
+  <section class="slide" id="slide-5"><div class="canvas deep" data-page="05 / 10">
+    <div class="arch">
+      <div>
+        <div class="eyebrow" data-i18n="s5eyebrow">05 · Core Technology</div>
+        <h2><span data-i18n="s5title">Claw</span> <span class="accent" data-i18n="s5accent">Constitution</span></h2>
+        <p class="lead" data-i18n="s5lead">A constitutional layer for multi-agent collaboration: capabilities are routed precisely, long-horizon memory is activated safely, and educational boundaries are enforced continuously.</p>
+        <ul class="arch-list">
+          <li><span>SKILL</span><div data-i18n="s5l1">Atomize AI capabilities so teachers can extend them with low-code skills.</div></li>
+          <li><span>ROUTING</span><div data-i18n="s5l2">Intent + risk routing dynamically schedules specialist agents.</div></li>
+          <li><span>MEMORY</span><div data-i18n="s5l3">Continuous context across semesters and school years.</div></li>
+          <li><span>CONSTITUTION</span><div data-i18n="s5l4">Values, boundaries, risks and privacy rules run through the full process.</div></li>
+        </ul>
+      </div>
+      <div class="arch-visual">
+        <svg viewBox="0 0 540 540" xmlns="http://www.w3.org/2000/svg">
+          <defs><radialGradient id="shell" cx="50%" cy="50%"><stop offset="0%" stop-color="#C9A961" stop-opacity="0"/><stop offset="85%" stop-color="#C9A961" stop-opacity=".14"/><stop offset="100%" stop-color="#C9A961" stop-opacity=".38"/></radialGradient><radialGradient id="core" cx="50%" cy="50%"><stop offset="0%" stop-color="#E07B47"/><stop offset="100%" stop-color="#9F3F0E"/></radialGradient></defs>
+          <circle cx="270" cy="270" r="235" fill="url(#shell)" stroke="#C9A961" stroke-dasharray="5 7" opacity=".85"/><text x="270" y="52" text-anchor="middle" fill="#C9A961" font-size="11" font-family="monospace" letter-spacing="3">CONSTITUTIONAL LAYER</text>
+          <g stroke="#C9A961" stroke-width=".9" stroke-dasharray="3 5" opacity=".45"><line x1="270" y1="270" x2="270" y2="100"/><line x1="270" y1="270" x2="390" y2="150"/><line x1="270" y1="270" x2="440" y2="270"/><line x1="270" y1="270" x2="390" y2="390"/><line x1="270" y1="270" x2="270" y2="440"/><line x1="270" y1="270" x2="150" y2="390"/><line x1="270" y1="270" x2="100" y2="270"/><line x1="270" y1="270" x2="150" y2="150"/></g>
+          <g fill="#0F2E2E" stroke="#C9A961" stroke-width="1.6"><circle cx="270" cy="100" r="24"/><circle cx="390" cy="150" r="24"/><circle cx="440" cy="270" r="24"/><circle cx="390" cy="390" r="24"/><circle cx="270" cy="440" r="24"/><circle cx="150" cy="390" r="24"/><circle cx="100" cy="270" r="24"/><circle cx="150" cy="150" r="24"/></g>
+          <g fill="#C9A961" font-size="11" font-family="sans-serif" text-anchor="middle"><text x="270" y="104" data-svg-en="Study" data-svg-zh="学业">Study</text><text x="390" y="154" data-svg-en="Care" data-svg-zh="情感">Care</text><text x="440" y="274" data-svg-en="Health" data-svg-zh="健康">Health</text><text x="390" y="394" data-svg-en="Career" data-svg-zh="生涯">Career</text><text x="270" y="444" data-svg-en="Class" data-svg-zh="课堂">Class</text><text x="150" y="394" data-svg-en="Eval" data-svg-zh="评价">Eval</text><text x="100" y="274" data-svg-en="Diag" data-svg-zh="诊断">Diag</text><text x="150" y="154" data-svg-en="Profile" data-svg-zh="画像">Profile</text></g>
+          <circle cx="270" cy="270" r="58" fill="url(#core)"/><text x="270" y="265" text-anchor="middle" fill="#fff" font-size="22" font-family="serif" font-weight="700">InnoSpark</text><text x="270" y="288" text-anchor="middle" fill="#FFD7B0" font-size="10" font-family="monospace" letter-spacing="2">EDU LLM CORE</text>
+          <ellipse cx="270" cy="493" rx="66" ry="15" fill="#C9A961" opacity=".13" stroke="#C9A961"/><text x="270" y="497" text-anchor="middle" fill="#C9A961" font-size="9" font-family="monospace" letter-spacing="2">LONG-HORIZON MEMORY</text>
+        </svg>
+      </div>
+    </div>
+  </div></section>
+
+  <section class="slide" id="slide-6"><div class="canvas" data-page="06 / 10">
+    <div class="eyebrow" data-i18n="s6eyebrow">06 · Product Capabilities</div>
+    <h2 data-i18n="s6title">From student support to school-level intelligence</h2>
+    <p class="lead" data-i18n="s6lead">The product is not a single feature. It is an education-native operating layer that serves students, teachers and administrators.</p>
+    <div class="cap-grid">
+      <div class="cap"><h3 data-i18n="s6c1t">Personalized learning</h3><p data-i18n="s6c1p">Adaptive tutoring, problem diagnosis, knowledge gaps and learning path recommendations.</p></div>
+      <div class="cap"><h3 data-i18n="s6c2t">Emotional companion</h3><p data-i18n="s6c2p">Daily dialogue, wellbeing observation and safe escalation with consent and governance.</p></div>
+      <div class="cap"><h3 data-i18n="s6c3t">Health coach</h3><p data-i18n="s6c3p">Exercise plans, micro-workouts, habit nudges and physical education feedback loops.</p></div>
+      <div class="cap"><h3 data-i18n="s6c4t">Career guidance</h3><p data-i18n="s6c4p">Interest exploration, growth portfolios and long-term development planning.</p></div>
+      <div class="cap"><h3 data-i18n="s6c5t">Teacher copilot</h3><p data-i18n="s6c5p">Lesson preparation, class diagnostics, differentiated assignments and early warning insights.</p></div>
+      <div class="cap"><h3 data-i18n="s6c6t">Governance dashboard</h3><p data-i18n="s6c6p">Class, school and regional analytics that support measurable education reform.</p></div>
+    </div>
+  </div></section>
+
+  <section class="slide" id="slide-7"><div class="canvas warm" data-page="07 / 10">
+    <div class="eyebrow" data-i18n="s7eyebrow">07 · Campus Scenarios</div>
+    <h2 data-i18n="s7title">What the companion looks like in daily school life</h2>
+    <div class="grid-3">
+      <div class="card story"><div class="card-num">01</div><h3 data-i18n="s7c1t">The sports coach for healthier routines</h3><div class="quote-mini" data-i18n="s7c1q">“A three-week plan helped me recover my 1000-meter run.”</div><p data-i18n="s7c1p">Based on exercise data, the companion provides daily micro-workouts, breathing tips and stretch videos.</p></div>
+      <div class="card story"><div class="card-num">02</div><h3 data-i18n="s7c2t">The confidant for introverted students</h3><div class="quote-mini" data-i18n="s7c2q">“She first told the companion what she could not tell her parents.”</div><p data-i18n="s7c2p">With consent, the companion helps teachers notice hidden strengths such as literary sensitivity.</p></div>
+      <div class="card story"><div class="card-num">03</div><h3 data-i18n="s7c3t">The early-warning sentinel for learning slippage</h3><div class="quote-mini" data-i18n="s7c3q">“The companion noticed abnormal math homework patterns.”</div><p data-i18n="s7c3p">Rising time-on-task and concentrated mistakes trigger timely teacher intervention.</p></div>
+    </div>
+  </div></section>
+
+  <section class="slide" id="slide-8"><div class="canvas" data-page="08 / 10">
+    <div class="eyebrow" data-i18n="s8eyebrow">08 · Deployment Path</div>
+    <h2 data-i18n="s8title">A practical route from pilot to full-school adoption</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-num">PHASE 1</div><div class="flow-title" data-i18n="s8f1t">Design</div><div class="flow-sub" data-i18n="s8f1s">Scenario mapping</div><p data-i18n="s8f1p">Identify school priorities and align companion scenarios with current workflows.</p></div>
+      <div class="flow-step"><div class="flow-num">PHASE 2</div><div class="flow-title" data-i18n="s8f2t">Pilot</div><div class="flow-sub" data-i18n="s8f2s">Small cohort</div><p data-i18n="s8f2p">Run controlled pilots with students, teachers and administrators to validate value.</p></div>
+      <div class="flow-step"><div class="flow-num">PHASE 3</div><div class="flow-title" data-i18n="s8f3t">Co-create</div><div class="flow-sub" data-i18n="s8f3s">Teacher skills</div><p data-i18n="s8f3p">Teachers extend scenarios with low-code skills and school-specific resources.</p></div>
+      <div class="flow-step"><div class="flow-num">PHASE 4</div><div class="flow-title" data-i18n="s8f4t">Scale</div><div class="flow-sub" data-i18n="s8f4s">Full rollout</div><p data-i18n="s8f4p">Expand to grade, school and regional deployment with governance and data feedback.</p></div>
+    </div>
+  </div></section>
+
+  <section class="slide" id="slide-9"><div class="canvas dark" data-page="09 / 10">
+    <div class="eyebrow" data-i18n="s9eyebrow">09 · Proof Points</div>
+    <h2 data-i18n="s9title">A foundation for implementation, not a concept demo</h2>
+    <p class="lead" data-i18n="s9lead">The current product narrative highlights early landing schools, a growing scenario library, six capability categories and a complete adoption path.</p>
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-num">3</div><p data-i18n="s9m1">early landing schools<br>Jinyuan · Jiaxiang · Jing’an</p></div>
+      <div class="metric"><div class="metric-num">67+</div><p data-i18n="s9m2">scenario library entries<br>across learning stages</p></div>
+      <div class="metric"><div class="metric-num">6</div><p data-i18n="s9m3">capability categories<br>study · psychology · health · career · evaluation · foundation</p></div>
+      <div class="metric"><div class="metric-num">4</div><p data-i18n="s9m4">deployment phases<br>from design to full rollout</p></div>
+    </div>
+  </div></section>
+
+  <section class="slide" id="slide-10"><div class="canvas deep" data-page="10 / 10">
+    <div class="eyebrow" data-i18n="s10eyebrow">10 · Next Step</div>
+    <h1 style="font-size:52px;line-height:1.12;max-width:960px" data-i18n="s10title">Bring AI into the classroom in a way schools can trust</h1>
+    <p class="lead" style="margin-top:24px;max-width:860px" data-i18n="s10lead">Talk with the ECNU Intelligent Education Lab team to explore how the learning companion can serve your school.</p>
+    <div style="position:absolute;right:64px;bottom:54px;text-align:right;color:rgba(255,255,255,.52);font-size:13px;line-height:1.8">
+      <strong style="color:var(--gold);font-weight:500">InnoSpark · AI Learning Companion</strong><br>
+      <span data-i18n="s10footer">ECNU Intelligent Education Lab · Shanghai Institute of Intelligent Education</span>
+    </div>
+  </div></section>
+</main>
+<script>
+const t={
+ brand:{en:'AI Learning Companion',zh:'AI 智能学伴'},deckLabel:{en:'Product Introduction Deck',zh:'产品介绍演示稿'},org1:{en:'ECNU Intelligent Education Lab',zh:'华东师范大学智能教育实验室'},org2:{en:'Shanghai Institute of Intelligent Education<br>Key Lab in Intelligent Education, Ministry of Education',zh:'上海智能教育研究院<br>教育部首批智能教育领域重点实验室'},
+ s1eyebrow:{en:'01 · Product Vision',zh:'01 · 产品愿景'},s1title:{en:'AI Learning Companion<br>for K-12 Teaching & Learning',zh:'AI 智能学伴<br>面向基础教育的'},s1accent:{en:'AI-powered teaching, learning and management tools',zh:'AI 教·学·管工具'},s1lead:{en:'One companion as the student-facing entry. An agent cluster in the background. An education-native LLM as the reasoning base. Claw Constitution as the collaboration governance layer.',zh:'以「学伴」为唯一入口，以「智能体集群」为后台分工，以「教育大模型」为推理底座，以「龙虾宪章」为协同治理。'},m1:{en:'Education LLM under local control',zh:'自主可控教育大模型'},m2:{en:'Multi-agent collaboration charter',zh:'多智能体协同宪章'},m3:{en:'Across semesters and school years',zh:'跨学期超长记忆体'},m4:{en:'Full-stack data governance',zh:'全栈数据治理'},
+ s2eyebrow:{en:'02 · Problem We Solve',zh:'02 · 我们要解决什么'},s2title:{en:'Three structural tensions in basic education',zh:'三个结构性矛盾'},s2lead:{en:'This is not another AI homework tool. It is designed to address long-standing core contradictions that technology has rarely solved well.',zh:'不是再做一个 AI 答题工具，也不是把智慧校园换个名字。我们要直接回应基础教育里那些长期没有被技术真正解决过的核心矛盾。'},s2c1t:{en:'Uniform pace vs. personalized learning',zh:'齐步走 vs 因材施教'},s2c1p:{en:'In a class of 40 students, teachers often teach to the average. Fast learners wait; struggling learners fall behind.',zh:'一个班 40 个学生，老师只能按平均水平教学，学得快的等不到拓展，学得慢的跟不上进度。'},s2c2t:{en:'Teacher overload vs. student overwork',zh:'老师超载 vs 学生超量'},s2c2p:{en:'Preparation, grading and reporting squeeze out time for instructional design and human care.',zh:'备课、批改、报表占用大量时间，真正用于教学设计与情感关怀的时间被压缩。'},s2c3t:{en:'Scattered data vs. intuition-led decisions',zh:'数据散落 vs 决策拍脑袋'},s2c3p:{en:'Academic, wellbeing and behavior data remain fragmented. Problems are often noticed only after exams.',zh:'教务、学务、心理、运动数据互不打通，月考成绩出来才知道哪个孩子掉队了。'},
+ s3eyebrow:{en:'03 · Core Definition',zh:'03 · 核心定义'},s3title:{en:'A companion, not just an agent',zh:'学伴，不只是智能体'},s3leftLabel:{en:'Student-facing',zh:'学生端'},s3leftTitle:{en:'What students see:<br>one companion.',zh:'学生看到的：<br>一个学伴。'},s3leftP:{en:'Students no longer switch among a dozen AI tools. Homework, reflection, exercise and planning all start from one trusted entry.',zh:'学生从此不再在十几个 AI 工具之间切换。做题、倾诉、运动、规划，都从同一个可信入口开始。'},orb:{en:'Companion',zh:'学伴'},s3rightLabel:{en:'System backend',zh:'系统后台'},s3rightTitle:{en:'What the system runs:<br>a professional agent cluster.',zh:'系统在做的：<br>一群专业智能体。'},s3rightP:{en:'Academic tutoring, emotional support, health coaching, career guidance and diagnostics are handled by specialist agents connected through intelligent routing and Claw Constitution.',zh:'学业、情感、健康、生涯、学情诊断由专业智能体分工完成，并由智能路由与龙虾宪章连接。'},
+ s4eyebrow:{en:'04 · Methodology',zh:'04 · 核心方法论'},s4title:{en:'Profile · Route · Companion · Analytics',zh:'一画 · 二路 · 三学 · 四析'},s4lead:{en:'A closed data loop connects teaching, learning, management and evaluation into one continuous operating flow.',zh:'一条数据闭环，把教、学、管、评四个动作串成一条连续的运行链路。'},s4f1t:{en:'Profile',zh:'一画'},s4f1s:{en:'Multidimensional portrait',zh:'多维画像'},s4f1p:{en:'Academic, psychological, health, behavior, interest and career data form a student digital twin.',zh:'学业、心理、健康、行为、兴趣、生涯六维数据构建学生数字孪生。'},s4f2t:{en:'Route',zh:'二路'},s4f2s:{en:'Intelligent routing',zh:'智能路由'},s4f2p:{en:'The companion detects intent and dynamically routes tasks to the right specialist agent.',zh:'学伴感知意图，动态路由到合适的专业智能体。'},s4f3t:{en:'Companion',zh:'三学'},s4f3s:{en:'Multi-scenario support',zh:'多场景陪伴'},s4f3p:{en:'One partner, multiple roles: tutor, friend, coach, advisor and creative collaborator.',zh:'一个伙伴，多重身份：老师、朋友、教练、顾问与创意协作者。'},s4f4t:{en:'Analytics',zh:'四析'},s4f4s:{en:'Data feedback',zh:'数据反哺'},s4f4p:{en:'Student, class and school insights feed back into lesson planning, decision-making and regional supervision.',zh:'沉淀学生、班级、学校三层画像，反哺备课、决策与区域督导。'},
+ s5eyebrow:{en:'05 · Core Technology',zh:'05 · 核心技术'},s5title:{en:'Claw',zh:'龙虾'},s5accent:{en:'Constitution',zh:'宪章'},s5lead:{en:'A constitutional layer for multi-agent collaboration: capabilities are routed precisely, long-horizon memory is activated safely, and educational boundaries are enforced continuously.',zh:'为多智能体协同立宪：让能力被精准路由，让超长记忆被安全唤醒，让教育边界被持续守护。'},s5l1:{en:'Atomize AI capabilities so teachers can extend them with low-code skills.',zh:'把 AI 能力原子化，教师可低代码扩展。'},s5l2:{en:'Intent + risk routing dynamically schedules specialist agents.',zh:'意图 + 风险双塔，动态调度专业智能体。'},s5l3:{en:'Continuous context across semesters and school years.',zh:'跨学期、跨学年的连续画像与情境上下文。'},s5l4:{en:'Values, boundaries, risks and privacy rules run through the full process.',zh:'价值观、边界、风险、隐私四类规则全程贯穿。'},
+ s6eyebrow:{en:'06 · Product Capabilities',zh:'06 · 产品能力'},s6title:{en:'From student support to school-level intelligence',zh:'从学生陪伴到学校级智能'},s6lead:{en:'The product is not a single feature. It is an education-native operating layer that serves students, teachers and administrators.',zh:'这不是单点功能，而是服务学生、教师、管理者的教育原生操作层。'},s6c1t:{en:'Personalized learning',zh:'个性化学习'},s6c1p:{en:'Adaptive tutoring, problem diagnosis, knowledge gaps and learning path recommendations.',zh:'自适应辅导、错因诊断、知识薄弱点识别与学习路径推荐。'},s6c2t:{en:'Emotional companion',zh:'情感陪伴'},s6c2p:{en:'Daily dialogue, wellbeing observation and safe escalation with consent and governance.',zh:'日常对话、心理状态观察，并在授权与治理框架下安全升级。'},s6c3t:{en:'Health coach',zh:'健康教练'},s6c3p:{en:'Exercise plans, micro-workouts, habit nudges and physical education feedback loops.',zh:'运动计划、微运动、习惯提醒与体育反馈闭环。'},s6c4t:{en:'Career guidance',zh:'生涯规划'},s6c4p:{en:'Interest exploration, growth portfolios and long-term development planning.',zh:'兴趣探索、成长档案与长期发展规划。'},s6c5t:{en:'Teacher copilot',zh:'教师副驾'},s6c5p:{en:'Lesson preparation, class diagnostics, differentiated assignments and early warning insights.',zh:'备课辅助、班级诊断、分层作业与学情预警。'},s6c6t:{en:'Governance dashboard',zh:'治理看板'},s6c6p:{en:'Class, school and regional analytics that support measurable education reform.',zh:'班级、学校、区域分析，支撑可量化的教育改革。'},
+ s7eyebrow:{en:'07 · Campus Scenarios',zh:'07 · 真实场景'},s7title:{en:'What the companion looks like in daily school life',zh:'学伴在校园里的日常'},s7c1t:{en:'The sports coach for healthier routines',zh:'健康生活的「运动教练」'},s7c1q:{en:'“A three-week plan helped me recover my 1000-meter run.”',zh:'“三周训练计划帮我把 1000 米跑回来了。”'},s7c1p:{en:'Based on exercise data, the companion provides daily micro-workouts, breathing tips and stretch videos.',zh:'基于运动数据，学伴提供每天 10 分钟微运动、呼吸方法与拉伸视频。'},s7c2t:{en:'The confidant for introverted students',zh:'内向学生的「AI 知己」'},s7c2q:{en:'“She first told the companion what she could not tell her parents.”',zh:'“她不敢跟父母说的烦恼，先告诉了学伴。”'},s7c2p:{en:'With consent, the companion helps teachers notice hidden strengths such as literary sensitivity.',zh:'在征得同意后，学伴帮助老师发现文学敏感度等不易被看见的闪光点。'},s7c3t:{en:'The early-warning sentinel for learning slippage',zh:'学业滑坡的「预警哨兵」'},s7c3q:{en:'“The companion noticed abnormal math homework patterns.”',zh:'“学伴发现了她数学作业的异常。”'},s7c3p:{en:'Rising time-on-task and concentrated mistakes trigger timely teacher intervention.',zh:'作业时长上升、错题集中时，学伴及时触发教师介入。'},
+ s8eyebrow:{en:'08 · Deployment Path',zh:'08 · 落地路径'},s8title:{en:'A practical route from pilot to full-school adoption',zh:'从试点到全校推广的务实路径'},s8f1t:{en:'Design',zh:'设计'},s8f1s:{en:'Scenario mapping',zh:'场景梳理'},s8f1p:{en:'Identify school priorities and align companion scenarios with current workflows.',zh:'识别学校重点问题，将学伴场景对齐现有流程。'},s8f2t:{en:'Pilot',zh:'试点'},s8f2s:{en:'Small cohort',zh:'小范围验证'},s8f2p:{en:'Run controlled pilots with students, teachers and administrators to validate value.',zh:'在学生、教师、管理者中开展小范围验证。'},s8f3t:{en:'Co-create',zh:'共创'},s8f3s:{en:'Teacher skills',zh:'教师 Skill'},s8f3p:{en:'Teachers extend scenarios with low-code skills and school-specific resources.',zh:'教师用低代码 Skill 扩展校本场景与资源。'},s8f4t:{en:'Scale',zh:'推广'},s8f4s:{en:'Full rollout',zh:'全员落地'},s8f4p:{en:'Expand to grade, school and regional deployment with governance and data feedback.',zh:'在治理和数据反馈机制下扩展到年级、学校与区域。'},
+ s9eyebrow:{en:'09 · Proof Points',zh:'09 · 数据背书'},s9title:{en:'A foundation for implementation, not a concept demo',zh:'不是概念演示，而是可落地底座'},s9lead:{en:'The current product narrative highlights early landing schools, a growing scenario library, six capability categories and a complete adoption path.',zh:'当前产品叙事已形成先行学校、场景库、六类能力与完整落地路径。'},s9m1:{en:'early landing schools<br>Jinyuan · Jiaxiang · Jing’an',zh:'先行落地学校<br>晋元 · 嘉祥 · 静安区'},s9m2:{en:'scenario library entries<br>across learning stages',zh:'全场景库累计场景数<br>覆盖学段全周期'},s9m3:{en:'capability categories<br>study · psychology · health · career · evaluation · foundation',zh:'能力大类<br>学业 · 心理 · 健康 · 生涯 · 评价 · 基础'},s9m4:{en:'deployment phases<br>from design to full rollout',zh:'落地阶段<br>从方案设计到全员推广'},
+ s10eyebrow:{en:'10 · Next Step',zh:'10 · 下一步'},s10title:{en:'Bring AI into the classroom in a way schools can trust',zh:'让 AI 以可信方式真正走进课堂'},s10lead:{en:'Talk with the ECNU Intelligent Education Lab team to explore how the learning companion can serve your school.',zh:'与华东师范大学智能教育实验室团队对话，看看学伴如何服务你的学校。'},s10footer:{en:'ECNU Intelligent Education Lab · Shanghai Institute of Intelligent Education',zh:'华东师范大学智能教育实验室 · 上海智能教育研究院'}
+};
+let lang=(new URLSearchParams(location.search)).get('lang')==='zh'?'zh':'en';
+function setLang(next){lang=next;document.documentElement.lang=next==='zh'?'zh-CN':'en';document.getElementById('enBtn').classList.toggle('active',next==='en');document.getElementById('zhBtn').classList.toggle('active',next==='zh');document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(t[k])el.innerHTML=t[k][next];});document.querySelectorAll('[data-svg-en]').forEach(el=>{el.textContent=next==='zh'?el.dataset.svgZh:el.dataset.svgEn;});}
+document.getElementById('enBtn').onclick=()=>setLang('en');document.getElementById('zhBtn').onclick=()=>setLang('zh');setLang(lang);
+const deck=document.getElementById('deck');const slides=[...document.querySelectorAll('.slide')];const dots=document.getElementById('dots');slides.forEach((s,i)=>{const b=document.createElement('button');b.className='dot';b.title=`Slide ${i+1}`;b.onclick=()=>s.scrollIntoView({behavior:'smooth'});dots.appendChild(b);});const dotEls=[...document.querySelectorAll('.dot')];function updateNav(){let idx=0,min=Infinity;slides.forEach((s,i)=>{const d=Math.abs(s.getBoundingClientRect().top);if(d<min){min=d;idx=i;}});dotEls.forEach((d,i)=>d.classList.toggle('active',i===idx));document.getElementById('slideCount').textContent=String(idx+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');}
+deck.addEventListener('scroll',()=>requestAnimationFrame(updateNav));window.addEventListener('resize',updateNav);updateNav();
+window.addEventListener('keydown',e=>{const current=dotEls.findIndex(d=>d.classList.contains('active'));if(e.key==='ArrowDown'||e.key==='PageDown'||e.key==='ArrowRight'){slides[Math.min(slides.length-1,current+1)].scrollIntoView({behavior:'smooth'});}if(e.key==='ArrowUp'||e.key==='PageUp'||e.key==='ArrowLeft'){slides[Math.max(0,current-1)].scrollIntoView({behavior:'smooth'});}if(e.key.toLowerCase()==='l')setLang(lang==='en'?'zh':'en');});
+</script>
+</body>
+</html>
