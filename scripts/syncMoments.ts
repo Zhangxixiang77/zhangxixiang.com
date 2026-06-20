@@ -195,7 +195,10 @@ async function main() {
   // Fetch FIRST (with retry). If this throws, we exit before touching any files,
   // so the previous build's images and data stay intact for the fallback path.
   console.log('Fetching moments from Notion…');
-  const response = await withRetry('Notion query', () =>
+  // <any> is required: `notion` is typed as `any` (CommonJS require), so without an
+  // explicit type argument the generic collapses to `unknown` and `next build`'s
+  // type check fails on `response.results`.
+  const response = await withRetry<any>('Notion query', () =>
     notion.databases.query({
       database_id: DATABASE_ID,
       filter: { property: 'published', checkbox: { equals: true } },
