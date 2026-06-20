@@ -11,12 +11,23 @@
  *     → verify with metadata()
  *     → save to public/moments/{id}-{version}.webp
  *
- * No Python required —100% Node.js.
+ * No Python required — 100% Node.js.
+ *
+ * Resilience:
+ *   - Notion query and image downloads are retried with exponential backoff.
+ *   - A single failed image falls back to a placeholder instead of killing the build.
+ *   - If Notion is completely unreachable but a previous sync exists,
+ *     the build continues with the last good data/moments.json.
  */
 
 import 'dotenv/config';
-import { writeFileSync, mkdirSync, unlinkSync, readdirSync, readFileSync } from 'fs';
-import { pipeline } from 'stream/promises';
+import {
+  writeFileSync,
+  mkdirSync,
+  unlinkSync,
+  readdirSync,
+  existsSync,
+} from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import https from 'https';
@@ -30,8 +41,50 @@ const DATA_FILE = join(ROOT, 'data', 'moments.json');
 // ─── Notion client ────────────────────────────────────────────────────────────
 
 const { Client } = require('@notionhq/client');
-const notion = new Client({ auth: process.env.NOTION_API_KEY });
+// timeoutMs gives each request a hard ceiling instead of hanging forever.
+const notion = new Client({
+  auth: process.env.NOTION_API_KEY,
+  timeoutMs: 60_000,
+});
 const DATABASE_ID = process.env.NOTION_DATABASE_ID ?? '';
+
+// ─── Retry helper ───────────────────────────────────────────────────────────────
+
+/** Decide whether an error is worth retrying (transient) vs. fatal (e.g. auth). */
+function isRetryable(err: unknown): boolean {
+  const e = err as any;
+  // Notion APIResponseError carries a numeric `status`.
+  if (typeof e?.status === 'number') {
+    return e.status === 429 || e.status >= 500; // rate-limited or server error
+  }
+  // Network / stream level errors — this is where "Premature close" lands.
+  const msg = `${e?.code ?? ''} ${e?.message ?? ''}`;
+  return /premature close|ECONNRESET|ETIMEDOUT|EAI_AGAIN|ENOTFOUND|socket hang up|network|fetch failed|aborted|timeout/i.test(
+    msg
+  );
+}
+
+async function withRetry<T>(
+  label: string,
+  fn: () => Promise<T>,
+  { retries = 4, baseDelayMs = 800 }: { retries?: number; baseDelayMs?: number } = {}
+): Promise<T> {
+  let lastErr: unknown;
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastErr = err;
+      if (attempt === retries || !isRetryable(err)) break;
+      const delay = baseDelayMs * 2 ** (attempt - 1); // 0.8s, 1.6s, 3.2s…
+      console.warn(
+        `  ↻ ${label} failed (attempt ${attempt}/${retries}): ${(err as Error).message}. Retrying in ${delay}ms…`
+      );
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+  throw lastErr;
+}
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -44,23 +97,40 @@ function isHeicBrand(buf: Buffer): boolean {
   );
 }
 
-async function downloadBuffer(url: string): Promise<Buffer> {
-  const chunks: Buffer[] = [];
-  const protocol = url.startsWith('https') ? https : http;
-  await new Promise<void>((resolve, reject) => {
-    protocol.get(url, (res) => {
-      if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-               return downloadBuffer(res.headers.location!).then(() => resolve()).catch(reject);
+/**
+ * Download a URL into a Buffer.
+ * Fixes the original redirect bug: the buffer from a redirected response is
+ * now actually returned (previously it was discarded, yielding an empty image).
+ * Adds a per-request timeout and drains skipped responses to avoid leaks.
+ */
+function downloadBuffer(url: string, redirectsLeft = 5): Promise<Buffer> {
+  return new Promise<Buffer>((resolve, reject) => {
+    const protocol = url.startsWith('https') ? https : http;
+    const req = protocol.get(url, (res) => {
+      const status = res.statusCode ?? 0;
+
+      // Follow redirects — and actually return the resulting buffer.
+      if (status >= 300 && status < 400 && res.headers.location) {
+        res.resume(); // drain the redirect response
+        if (redirectsLeft <= 0) return reject(new Error('Too many redirects'));
+        const next = new URL(res.headers.location, url).toString();
+        return resolve(downloadBuffer(next, redirectsLeft - 1));
       }
-      if (res.statusCode !== 200) {
-        return reject(new Error(`HTTP ${res.statusCode}`));
+
+      if (status !== 200) {
+        res.resume();
+        return reject(new Error(`HTTP ${status}`));
       }
-      res.on('data', (chunk: Buffer) => chunks.push(chunk));
-      res.on('end', () => resolve());
+
+      const chunks: Buffer[] = [];
+      res.on('data', (c: Buffer) => chunks.push(c));
+      res.on('end', () => resolve(Buffer.concat(chunks)));
       res.on('error', reject);
-    }).on('error', reject);
+    });
+
+    req.on('error', reject);
+    req.setTimeout(30_000, () => req.destroy(new Error('Download timeout')));
   });
-  return Buffer.concat(chunks);
 }
 
 async function toWebp(inputBuf: Buffer, outputPath: string): Promise<void> {
@@ -92,53 +162,60 @@ async function toWebp(inputBuf: Buffer, outputPath: string): Promise<void> {
 
 // ─── Main ────────────────────────────────────────────────────────────────────────
 
+const PLACEHOLDER_ICON_MAP: Record<number, string> = {
+  0: 'coffee', 1: 'mountain', 2: 'headphones', 3: 'book', 4: 'camera',
+  5: 'soup', 6: 'flower', 7: 'bike', 8: 'feather', 9: 'home',
+};
+const PLACEHOLDER_BG_MAP: Record<number, string> = {
+  0: 'rgba(239, 159, 39, 0.18)', 1: 'rgba(29, 158, 117, 0.18)',
+  2: 'rgba(127, 119, 221, 0.18)', 3: 'rgba(56, 138, 221, 0.18)',
+  4: 'rgba(136, 135, 128, 0.20)', 5: 'rgba(216, 90, 48, 0.18)',
+  6: 'rgba(212, 83, 126, 0.16)', 7: 'rgba(15, 142, 158, 0.18)',
+  8: 'rgba(239, 159, 39, 0.15)', 9: 'rgba(56, 138, 221, 0.13)',
+};
+
+type Moment = {
+  id: string;
+  caption: string;
+  date: string;
+  image?: string;
+  placeholderBg?: string;
+  placeholderIcon?: string;
+};
+
+function applyPlaceholder(moment: Moment, index: number) {
+  moment.placeholderIcon = PLACEHOLDER_ICON_MAP[index % 10];
+  moment.placeholderBg = PLACEHOLDER_BG_MAP[index % 10];
+}
+
 async function main() {
   console.log('NOTION_API_KEY:', process.env.NOTION_API_KEY ? '✔ set' : '✗ MISSING');
   console.log('NOTION_DATABASE_ID:', process.env.NOTION_DATABASE_ID ? '✔ set' : '✗ MISSING');
 
-  // Clear old images before syncing — removes stale/bad files
+  // Fetch FIRST (with retry). If this throws, we exit before touching any files,
+  // so the previous build's images and data stay intact for the fallback path.
+  console.log('Fetching moments from Notion…');
+  const response = await withRetry('Notion query', () =>
+    notion.databases.query({
+      database_id: DATABASE_ID,
+      filter: { property: 'published', checkbox: { equals: true } },
+      sorts: [{ property: 'date', direction: 'descending' }],
+      page_size: 100,
+    })
+  );
+
+  // Only now that we have fresh data do we clear the old images.
+  mkdirSync(PUBLIC_DIR, { recursive: true });
+  mkdirSync(dirname(DATA_FILE), { recursive: true });
   try {
     const old = readdirSync(PUBLIC_DIR);
-    for (const f of old) {
-      unlinkSync(join(PUBLIC_DIR, f));
-    }
+    for (const f of old) unlinkSync(join(PUBLIC_DIR, f));
     console.log(`Cleared ${old.length} old files from public/moments`);
   } catch {
     // directory empty or missing — fine
   }
 
-  mkdirSync(PUBLIC_DIR, { recursive: true });
-  mkdirSync(dirname(DATA_FILE), { recursive: true });
-
-  console.log('Fetching moments from Notion…');
-  const response = await notion.databases.query({
-    database_id: DATABASE_ID,
-    filter: { property: 'published', checkbox: { equals: true } },
-    sorts: [{ property: 'date', direction: 'descending' }],
-    page_size: 100,
-  });
-
-  const moments: {
-    id: string;
-    caption: string;
-    date: string;
-    image?: string;
-    placeholderBg?: string;
-    placeholderIcon?: string;
-  }[] = [];
-
-  const PLACEHOLDER_ICON_MAP: Record<number, string> = {
-    0: 'coffee', 1: 'mountain', 2: 'headphones', 3: 'book', 4: 'camera',
-    5: 'soup', 6: 'flower', 7: 'bike', 8: 'feather', 9: 'home',
-  };
-  const PLACEHOLDER_BG_MAP: Record<number, string> = {
-    0: 'rgba(239, 159, 39, 0.18)', 1: 'rgba(29, 158, 117, 0.18)',
-    2: 'rgba(127, 119, 221, 0.18)', 3: 'rgba(56, 138, 221, 0.18)',
-    4: 'rgba(136, 135, 128, 0.20)', 5: 'rgba(216, 90, 48, 0.18)',
-    6: 'rgba(212, 83, 126, 0.16)', 7: 'rgba(15, 142, 158, 0.18)',
-    8: 'rgba(239, 159, 39, 0.15)', 9: 'rgba(56, 138, 221, 0.13)',
-  };
-
+  const moments: Moment[] = [];
   const downloadPromises: Promise<void>[] = [];
 
   for (const page of response.results) {
@@ -155,15 +232,13 @@ async function main() {
         ? imageFiles[0].file?.url
         : undefined;
 
-    const moment: typeof moments[0] = {
-      id: p.id,
-      caption: captionRaw,
-      date: dateRaw,
-    };
+    const moment: Moment = { id: p.id, caption: captionRaw, date: dateRaw };
+    moments.push(moment);
+    const momentIndex = moments.length - 1;
 
     if (imageUrl) {
-      // Versioned filename — URL changes when Notion content updates
       const version = (p.last_edited_time ?? Date.now())
+        .toString()
         .replaceAll('-', '')
         .replaceAll(':', '')
         .replaceAll('.', '');
@@ -173,20 +248,27 @@ async function main() {
       downloadPromises.push(
         (async () => {
           console.log(`  Download: ${captionRaw.slice(0, 40)}…`);
-          const buf = await downloadBuffer(imageUrl);
-          await toWebp(buf, localPath);
-          moment.image = `/moments/${localFile}`;
+          try {
+            const buf = await withRetry(`image "${captionRaw.slice(0, 20)}"`, () =>
+              downloadBuffer(imageUrl)
+            );
+            await toWebp(buf, localPath);
+            moment.image = `/moments/${localFile}`;
+          } catch (err) {
+            // One bad image must not fail the whole build — degrade gracefully.
+            console.warn(
+              `  ⚠ image failed for "${captionRaw.slice(0, 20)}", using placeholder: ${(err as Error).message}`
+            );
+            applyPlaceholder(moment, momentIndex);
+          }
         })()
       );
     } else {
-      const idx = moments.length % 10;
-      moment.placeholderIcon = PLACEHOLDER_ICON_MAP[idx];
-      moment.placeholderBg = PLACEHOLDER_BG_MAP[idx];
+      applyPlaceholder(moment, momentIndex);
     }
-
-    moments.push(moment);
   }
 
+  // Each promise handles its own errors, so this never rejects.
   await Promise.all(downloadPromises);
 
   writeFileSync(DATA_FILE, JSON.stringify(moments, null, 2));
@@ -195,5 +277,14 @@ async function main() {
 
 main().catch((err) => {
   console.error('syncMoments failed:', err);
+
+  // Graceful degradation: if a previous successful sync exists, let the build
+  // continue with the last good data instead of failing the deployment.
+  if (existsSync(DATA_FILE)) {
+    console.warn('⚠ Notion sync failed — building with the previous data/moments.json.');
+    process.exit(0);
+  }
+
+  // No prior data to fall back on — a hard failure is the honest outcome here.
   process.exit(1);
 });
