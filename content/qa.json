@@ -12,9 +12,18 @@
     },
     {
       "q": "what are you building right now?",
-      "a": "Smart Learning Companion",
-      "linkLabel": "see it →",
-      "linkHref": "https://zhangxixiang.com/p"
+      "projects": [
+        {
+          "a": "Smart Learning Companion",
+          "linkLabel": "see it →",
+          "linkHref": "https://zhangxixiang.com/p"
+        },
+        {
+          "a": "AI-Ready Schools Initiative",
+          "linkLabel": "see it →",
+          "linkHref": "https://www.allsetforai.com/"
+        }
+      ]
     },
     {
       "q": "what team have you always backed?",
