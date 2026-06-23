@@ -96,16 +96,38 @@ function PlacesBody() {
   );
 }
 
+type QaAnswer = {
+  a: string;
+  linkLabel?: string;
+  linkHref?: string;
+};
+
+function QaAnswerLine({ a, linkLabel, linkHref }: QaAnswer) {
+  return (
+    <p className="mt-1 text-[13px] text-ink">
+      {a}
+      {linkLabel && linkHref && (
+        <>
+          {' '}
+          <a
+            href={linkHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-1 border-b border-ink-faint transition-colors hover:border-ink"
+          >
+            {linkLabel}
+          </a>
+        </>
+      )}
+    </p>
+  );
+}
+
 function QaBody() {
   return (
     <ul className="space-y-4">
       {qa.items.map((it, i) => {
-        const item = it as {
-          q: string;
-          a: string;
-          linkLabel?: string;
-          linkHref?: string;
-        };
+        const item = it as QaAnswer & { q: string; projects?: QaAnswer[] };
         return (
           <li
             key={i}
@@ -114,22 +136,15 @@ function QaBody() {
             <p className="text-[12px] italic tracking-[0.02em] text-ink-soft">
               {item.q}
             </p>
-            <p className="mt-1 text-[13px] text-ink">
-              {item.a}
-              {item.linkLabel && item.linkHref && (
-                <>
-                  {' '}
-                  <a
-                    href={item.linkHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="ml-1 border-b border-ink-faint transition-colors hover:border-ink"
-                  >
-                    {item.linkLabel}
-                  </a>
-                </>
+            {item.projects
+              ? item.projects.map((p, j) => <QaAnswerLine key={j} {...p} />)
+              : (
+                <QaAnswerLine
+                  a={item.a}
+                  linkLabel={item.linkLabel}
+                  linkHref={item.linkHref}
+                />
               )}
-            </p>
           </li>
         );
       })}
