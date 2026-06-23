@@ -2,15 +2,15 @@
   "title": "likes",
   "subtitle": "ten things, no particular order",
   "items": [
-    { "kind": "food", "value": "Dumplings" },
-    { "kind": "drink", "value": "Zero Coke with Ice" },
-    { "kind": "fruit", "value": "Watermelon" },
+    { "kind": "food", "value": "Dumplings — especially the ones my mom makes" },
+    { "kind": "drink", "value": "Zero Coke, extra ice — same joy, zero receipts" },
+    { "kind": "fruit", "value": "Watermelon — summer's way of paying me" },
     { "kind": "game", "value": "NBA 2K" },
     { "kind": "color", "value": "Light Blue", "hex": "#90d6ff" },
-     { "kind": "song", "value": "刀郎 — 《西海情歌》" },
-    { "kind": "shoes", "value": "Nike AF1 Flyknit — no-crease" },
+    { "kind": "song", "value": "刀郎 — 《西海情歌》" },
+    { "kind": "shoes", "value": "Nike AF1 Flyknit — creases, stay away from me" },
     { "kind": "word", "value": "Accept" },
-    { "kind": "characters", "value": "Yi'er and Bubu" },
+    { "kind": "characters", "value": "Yi'er & Bubu — my two emotional support icons" },
     { "kind": "line", "value": "他强任他强, i am zhang·xi·xiang." }
   ]
 }
