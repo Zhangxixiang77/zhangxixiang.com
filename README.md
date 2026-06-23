@@ -2,20 +2,24 @@
 
 个人站点 —— 极简、安静、双列布局。
 
-> 完整设计与规格说明见之前的 spec 文档。
-> 当前代码处在 **Phase 1**：完整布局可跑，Moments 用占位数据，未接 Notion。
-
 ## 起步
 
 ```bash
 # 1. 安装依赖
 npm install
 
-# 2. 跑起来
+# 2.（可选）配置 Notion，用于同步 moments 数据
+echo "NOTION_API_KEY=secret_xxx" >> .env.local
+echo "NOTION_DATABASE_ID=xxx" >> .env.local
+
+# 3. 跑起来
 npm run dev
 ```
 
 打开 [http://localhost:3000](http://localhost:3000)。
+
+> 没配 Notion 也能跑：`npm run dev` 不会触发同步，`moments` 区域会显示空状态。
+> 但 `npm run build` 会先跑一次同步，如果没有 Notion 环境变量、本地也没有之前同步过的 `data/moments.json`，构建会直接失败（见下文「Moments 数据怎么来的」）。
 
 ## 项目结构
 
@@ -25,24 +29,35 @@ npm run dev
 │   ├── layout.tsx              # 字体、metadata
 │   ├── page.tsx                # 首页（双列：about | moments）
 │   ├── globals.css             # CSS 变量（设计 tokens）
-│   └── moments/
-│       └── page.tsx            # /moments 归档页
+│   ├── moments/
+│   │   └── page.tsx            # /moments 归档页
+│   └── p/
+│       └── page.tsx            # /p 项目页（密码门 + preview.html 预览）
 ├── components/
 │   ├── Hero.tsx                # 名字 + 单句双语 tagline
+│   ├── Avatar.tsx               # 头像
 │   ├── SectionHeader.tsx       # 左对齐 section 头
 │   ├── AboutCards.tsx          # 4 张折叠卡（点击弹模态）
 │   ├── MomentsGrid.tsx         # 首页 3×3 grid
 │   ├── MomentsArchive.tsx      # /moments 完整归档
 │   ├── Modal.tsx               # 通用对话框
 │   └── Footer.tsx              # GitHub + email + 署名
-├── content/                    # 静态 about 内容（你来填）
+├── content/                    # 静态 about 内容
 │   ├── education.json
 │   ├── places.json
 │   ├── qa.json
 │   └── likes.json
 ├── lib/
-│   ├── getMoments.ts           # moments 数据源 + 类型
+│   ├── getMoments.ts           # 运行时读 data/moments.json，零 Notion 调用
 │   └── voice.ts                # 微文案集中管理
+├── scripts/
+│   └── syncMoments.ts          # 构建前跑：Notion → 转 WebP → data/moments.json
+├── data/
+│   └── moments.json            # 由 syncMoments 生成，已 gitignore
+├── public/
+│   ├── avatar.png
+│   ├── preview.html            # /p 页面里 iframe 加载的内容
+│   └── moments/                # 同步生成的图片，已 gitignore
 ├── tailwind.config.ts
 ├── next.config.mjs
 └── package.json
@@ -54,11 +69,11 @@ npm run dev
 - **手机**：单列堆叠（about → moments）
 - 容器最宽 `max-w-5xl` (~1024px)
 
-## 现在就可以做的事
+## 改内容
 
-### 填 About 内容
+### About 卡片
 
-四个 JSON 文件，每个都有占位文字。直接编辑：
+四个 JSON 文件，对应首页 about 区域的四张卡：
 
 - `content/education.json`
 - `content/places.json`
@@ -67,7 +82,7 @@ npm run dev
 
 存盘后开发服务器自动热更新。
 
-### 改设计 tokens
+### 设计 tokens
 
 - 颜色变量：`app/globals.css` 顶部的 `:root`
 - 字体配置：`app/layout.tsx`（用的 `next/font/google`）
@@ -77,41 +92,35 @@ npm run dev
 
 所有可调的小文案集中在 `lib/voice.ts`。改这一个文件就能调整全站的"声音"。
 
-## 接下来 (Phase 2) —— 接入 Notion
+## Moments 数据怎么来的
 
-当前 `lib/getMoments.ts` 返回硬编码的占位数据。Phase 2 就是把它换成 Notion 查询。
+`moments` 不是运行时查 Notion，而是构建前跑一次 `scripts/syncMoments.ts`：
 
-```bash
-npm install @notionhq/client
-```
+1. 查 Notion database（只取 `published` 勾选的行）
+2. 图片下载下来，HEIC/HEIF 先转 JPEG，再统一转成 WebP，存到 `public/moments/`
+3. 结果写进 `data/moments.json`
+4. `lib/getMoments.ts` 运行时只读这个静态文件，不调 Notion
 
-```ts
-// 在 lib/getMoments.ts 里替换实现
-import { Client } from '@notionhq/client';
+单张图片下载/转码失败不会拖垮整个构建，会自动退化成占位图标。Notion 整体查询失败时，如果本地已有上一次成功的 `data/moments.json`，构建会用旧数据继续；连旧数据都没有才会真正失败。
 
-const notion = new Client({ auth: process.env.NOTION_TOKEN });
-
-export async function getMoments(): Promise<Moment[]> {
-  const res = await notion.databases.query({
-    database_id: process.env.NOTION_DATABASE_ID!,
-    sorts: [{ property: 'date', direction: 'descending' }],
-    filter: { property: 'published', checkbox: { equals: true } },
-  });
-  return res.results.map(mapNotionPageToMoment);
-}
-```
+需要的环境变量：
 
 ```bash
-echo "NOTION_TOKEN=secret_xxx" >> .env.local
-echo "NOTION_DATABASE_ID=xxx" >> .env.local
+NOTION_API_KEY=secret_xxx
+NOTION_DATABASE_ID=xxx
+```
+
+手动触发同步：
+
+```bash
+npm run sync
 ```
 
 ## 部署到 Vercel
 
 ```bash
-# 1. 推到 GitHub
+# 1. 推到 GitHub（仓库已存在的话跳过）
 git init && git add . && git commit -m "init"
-# 在 GitHub 上建仓库，然后 push
 
 # 2. 在 vercel.com 上 import 这个仓库
 #    自动检测为 Next.js，一路 Next。
@@ -119,8 +128,8 @@ git init && git add . && git commit -m "init"
 # 3. 在 Vercel 项目 Settings → Domains 里加 zhangxixiang.com
 #    Vercel 会告诉你 DNS 怎么配。
 
-# 4. Phase 2 之后，在 Vercel 项目 Settings → Environment Variables
-#    加 NOTION_TOKEN 和 NOTION_DATABASE_ID。
+# 4. 在 Vercel 项目 Settings → Environment Variables 里加
+#    NOTION_API_KEY 和 NOTION_DATABASE_ID
 ```
 
 ## 备注
@@ -129,12 +138,9 @@ git init && git add . && git commit -m "init"
 - About 卡片用 Modal 弹窗展示内容。
 - 整站唯一中文：hero tagline 里的 `他强任他强`。其他全部小写英文。
 
-## 已知占位 / TODO
+## TODO
 
-- [ ] About 四个 JSON 里全部用真实内容替换 `[占位文字]`
-- [ ] 拍/选第一批 moments
-- [ ] 跑通 Notion 集成（Phase 2）
-- [ ] 跑一遍移动端 QA
 - [ ] favicon、Open Graph 图
+- [ ] 跑一遍移动端 QA
 
 — 祝你写得开心。
