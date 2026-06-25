@@ -3,12 +3,12 @@
   "subtitle": "ten things, no particular order",
   "items": [
     { "kind": "food", "value": "Dumplings — especially the ones my mom makes" },
-    { "kind": "drink", "value": "Zero Coke, extra ice — same joy, zero receipts" },
+    { "kind": "drink", "value": "Zero Coke, extra ice" },
     { "kind": "fruit", "value": "Watermelon — 90% water, 100% mood" },
     { "kind": "game", "value": "NBA 2K" },
     { "kind": "color", "value": "Light Blue", "hex": "#90d6ff" },
     { "kind": "song", "value": "刀郎 — 《西海情歌》 — a classic, on loop" },
-    { "kind": "shoes", "value": "AF1 Flyknit — creases, stay away from me" },
+    { "kind": "shoes", "value": "AF1 Flyknit — I hate creases" },
     { "kind": "word", "value": "Accept" },
     { "kind": "characters", "value": "Yi'er & Bubu — my two emotional support icons" },
     { "kind": "line", "value": "他强任他强, i am zhang·xi·xiang." }
