@@ -2,27 +2,15 @@ name: Daily Redeploy
 
 on:
   schedule:
-    - cron: '0 20 */3 * *'   # 每3天执行一次（每月1,4,7,10...号）
+    - cron: '0 20 * * *'
   workflow_dispatch:
-
-permissions:
-  contents: write
-  actions: write
 
 jobs:
   redeploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
       - name: Trigger Vercel Deploy Hook
         run: curl -X POST "$VERCEL_DEPLOY_HOOK"
         env:
           VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
-
-      - name: Keepalive
-        uses: gautamkrishnar/keepalive-workflow@v2
-        with:
-          time_elapsed: 45
