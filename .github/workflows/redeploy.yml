@@ -2,8 +2,11 @@ name: Daily Redeploy
 
 on:
   schedule:
-    - cron: '0 20 * * *'
+    - cron: '0 20 */3 * *'   # 每3天执行一次（每月1,4,7,10...号）
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   redeploy:
@@ -14,3 +17,15 @@ jobs:
         run: curl -X POST "$VERCEL_DEPLOY_HOOK"
         env:
           VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Keep repository active
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          date -u "+%Y-%m-%d %H:%M:%S UTC" > .last-redeploy
+          git add .last-redeploy
+          git diff --staged --quiet || git commit -m "chore: keepalive commit"
+          git push
