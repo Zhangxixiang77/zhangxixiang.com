@@ -9,7 +9,7 @@ const LINKS = [
     external: true,
   },
   {
-    href: 'mailto:Xixiang.Zhang@warwick.ac.uk',
+    href: 'mailto:52300936020@stu.ecnu.edu.cn',
     label: 'Email',
     Icon: IconMail,
     external: false, // mailto opens email client, no new tab needed
